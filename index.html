@@ -1058,10 +1058,10 @@
     /*************************************************
      * DESENHO DO GRÁFICO DE EVOLUÇÃO
      *************************************************/
-    function drawFitnessPlot() {
+    function desenharGraficoFitness() {
       const ctx = ctxGrafico;
-      const w = plotCanvas.width;
-      const h = plotCanvas.height;
+      const w = canvasGrafico.width;
+      const h = canvasGrafico.height;
 
       ctx.clearRect(0, 0, w, h);
 
@@ -1325,20 +1325,20 @@
         `População: ${TAMANHO_POPULACAO}`;
 
       // Atualiza visualizações
-      desenharRedeNeural(melhorGenoma, null);
-      drawFitnessPlot();
+      desenharRedeNeural(melhorGenoma, ativacoesAtuais);
+      desenharGraficoFitness();
     }
 
     /*************************************************
      * LOOP DE ANIMAÇÃO (JOGO)
      *************************************************/
-    function animationLoop() {
+    function loopAnimacao() {
       // Jogo principal
       atualizarVisualizacaoPong();
       desenharPongPrincipal();
 
       // Atualiza visualização da rede neural com ativações
-      desenharRedeNeural(melhorGenoma, null);
+      desenharRedeNeural(melhorGenoma, ativacoesAtuais);
 
       // Jogos adicionais
       atualizarJogo(ambienteJogo1, redeJogo1, genomaJogo1);
@@ -1350,7 +1350,7 @@
       atualizarJogo(ambienteJogo3, redeJogo3, genomaJogo3);
       desenharPong(ambienteJogo3, ctxJogo3, 200, 150);
 
-      requestAnimationFrame(animationLoop);
+      requestAnimationFrame(loopAnimacao);
     }
 
     /*************************************************
@@ -1507,7 +1507,7 @@
 
     // Desenho inicial
     desenharRedeNeural(melhorGenoma, null);
-    drawFitnessPlot();
+    desenharGraficoFitness();
     ambienteVisualizacao.reiniciar();
     desenharPongPrincipal();
     ambienteJogo1.reiniciar();
@@ -1518,22 +1518,22 @@
     desenharPong(ambienteJogo3, ctxJogo3, 200, 150);
 
     // Loop de treinamento (uma geração a cada ~300 ms)
-    setInterval(trainingStep, 30);
+    setInterval(passoTreinamento, 30);
 
     // Atualiza genomas dos jogos adicionais periodicamente com genomas aleatórios da população
     setInterval(() => {
-      if (algoritmoGenetico.population.length > 0) {
-        const idx1 = Math.floor(Math.random() * algoritmoGenetico.population.length);
-        const idx2 = Math.floor(Math.random() * algoritmoGenetico.population.length);
-        const idx3 = Math.floor(Math.random() * algoritmoGenetico.population.length);
-        game1Genome = new Float64Array(algoritmoGenetico.population[idx1]);
-        game2Genome = new Float64Array(algoritmoGenetico.population[idx2]);
-        game3Genome = new Float64Array(algoritmoGenetico.population[idx3]);
+      if (algoritmoGenetico.populacao.length > 0) {
+        const idx1 = Math.floor(Math.random() * algoritmoGenetico.populacao.length);
+        const idx2 = Math.floor(Math.random() * algoritmoGenetico.populacao.length);
+        const idx3 = Math.floor(Math.random() * algoritmoGenetico.populacao.length);
+        genomaJogo1 = new Float64Array(algoritmoGenetico.populacao[idx1]);
+        genomaJogo2 = new Float64Array(algoritmoGenetico.populacao[idx2]);
+        genomaJogo3 = new Float64Array(algoritmoGenetico.populacao[idx3]);
       }
     }, 2000);
 
     // Loop de animação do jogo
-    requestAnimationFrame(animationLoop);
+    requestAnimationFrame(loopAnimacao);
   </script>
 </body>
 </html>
