@@ -5,22 +5,32 @@
   <title>Pong + Algoritmo Genético em JavaScript</title>
   <style>
     body {
-      background: #111;
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
       color: #eee;
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
       padding: 0;
+      min-height: 100vh;
     }
 
-    h1, h2 {
-      margin: 8px 0;
+    h1 {
+      margin: 0 0 16px 0;
+      color: #4CAF50;
+      font-size: 24px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    h2 {
+      margin: 0 0 16px 0;
     }
 
     #container {
       display: flex;
-      flex-direction: column;
-      gap: 16px;
-      padding: 16px;
+      flex-direction: row;
+      gap: 20px;
+      padding: 20px;
+      max-width: 1800px;
+      margin: 0 auto;
     }
 
     #gamesRow {
@@ -28,55 +38,91 @@
       flex-direction: row;
       gap: 16px;
       flex-wrap: wrap;
+      justify-content: center;
     }
 
     #leftColumn, #rightColumn {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 20px;
     }
 
     #leftColumn {
-      flex: 1;
-      min-width: 380px;
+      flex: 0 0 520px;
+      max-width: 520px;
     }
 
     #rightColumn {
       flex: 1;
-      min-width: 380px;
+      min-width: 800px;
+    }
+
+    @media (max-width: 1400px) {
+      #container {
+        flex-direction: column;
+      }
+      
+      #leftColumn, #rightColumn {
+        flex: 1;
+        max-width: 100%;
+        min-width: 0;
+      }
     }
 
     .gamePanel {
-      background: #222;
-      border-radius: 8px;
-      padding: 12px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.5);
+      background: #1a1a1a;
+      border-radius: 10px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+      border: 1px solid #333;
       min-width: 200px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .gamePanel:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
     }
 
     .gamePanel h3 {
-      margin: 0 0 8px 0;
+      margin: 0 0 12px 0;
       font-size: 14px;
       text-align: center;
+      color: #4CAF50;
+      font-weight: bold;
     }
 
     .gamePanel canvas {
       width: 200px;
       height: 150px;
+      border: 1px solid #444;
     }
 
     .panel {
       background: #222;
-      border-radius: 8px;
-      padding: 12px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.5);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+      border: 1px solid #333;
+    }
+
+    .panel h2 {
+      margin-top: 0;
+      margin-bottom: 16px;
+      color: #4CAF50;
+      font-size: 20px;
+      font-weight: bold;
+      border-bottom: 2px solid #333;
+      padding-bottom: 8px;
     }
 
     canvas {
       background: #000;
-      border-radius: 4px;
+      border-radius: 8px;
       display: block;
       margin: 0 auto;
+      border: 2px solid #333;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
     }
 
     #info {
@@ -277,7 +323,7 @@
   <div id="container">
     <div id="leftColumn">
       <div class="panel">
-        <h1>Pong + Algoritmo Genético</h1>
+        <h1>🎮 Pong + Algoritmo Genético</h1>
         <div id="info"></div>
         <div style="margin-top:8px;">
           <button id="toggleTrainingBtn">Pausar Treinamento</button>
@@ -357,7 +403,7 @@
         </div>
       </div>
       <div class="panel">
-        <h2>Todos os Jogos</h2>
+        <h2>🎯 Todos os Jogos</h2>
         <div id="gamesRow">
           <div class="gamePanel">
             <h3>Principal (melhor)</h3>
@@ -381,12 +427,12 @@
 
     <div id="rightColumn">
       <div class="panel">
-        <h2>Rede Neural (melhor indivíduo)</h2>
-        <canvas id="nnCanvas" width="400" height="300"></canvas>
+        <h2>🧠 Rede Neural (melhor indivíduo)</h2>
+        <canvas id="nnCanvas" width="800" height="600"></canvas>
       </div>
       <div class="panel">
-        <h2>Evolução do Fitness</h2>
-        <canvas id="plotCanvas" width="400" height="300"></canvas>
+        <h2>📈 Evolução do Fitness</h2>
+        <canvas id="plotCanvas" width="800" height="400"></canvas>
       </div>
     </div>
   </div>
@@ -827,8 +873,8 @@
       const ctx = ctxRede;
       ctx.clearRect(0, 0, canvasRede.width, canvasRede.height);
 
-      const marginX = 40;
-      const marginY = 40;
+      const marginX = 120;
+      const marginY = 60;
 
       const posicoesX = [
         marginX,
@@ -876,11 +922,11 @@
       // Função para obter tamanho baseado na ativação
       function obterTamanhoNo(ativacao) {
         const intensidade = Math.abs(ativacao);
-        return 5 + intensidade * 4; // Tamanho entre 5 e 9
+        return 12 + intensidade * 8; // Tamanho entre 12 e 20
       }
 
       // Linhas entre entrada -> oculto com espessura baseada nos pesos
-      ctx.lineWidth = 0.5;
+      ctx.lineWidth = 1;
       for (let i = 0; i < TAMANHO_ENTRADA; i++) {
         for (let h = 0; h < TAMANHO_OCULTO; h++) {
           const peso = redeVisualizacao.pesos1[h * TAMANHO_ENTRADA + i];
@@ -906,22 +952,46 @@
         }
       }
 
+      // Nomes das entradas
+      const nomesEntradas = [
+        "Pos X Bola",
+        "Pos Y Bola",
+        "Vel X Bola",
+        "Vel Y Bola",
+        "Pos Y Raquete",
+        "Dif Y"
+      ];
+
       // Desenha nós de entrada
       for (let i = 0; i < TAMANHO_ENTRADA; i++) {
         const no = nosEntrada[i];
         const ativacao = ativacoes ? ativacoes.entrada[i] : 0;
         const cor = ativacoes ? obterCorAtivacao(ativacao) : "#4CAF50";
-        const tamanho = ativacoes ? obterTamanhoNo(ativacao) : 7;
+        const tamanho = ativacoes ? obterTamanhoNo(ativacao) : 14;
         
         ctx.fillStyle = cor;
-        ctx.beginPath();
+          ctx.beginPath();
         ctx.arc(no.x, no.y, tamanho, 0, Math.PI * 2);
-        ctx.fill();
+          ctx.fill();
         
         // Borda
         ctx.strokeStyle = "#fff";
         ctx.lineWidth = 1;
         ctx.stroke();
+
+        // Label do neurônio (à esquerda)
+        ctx.fillStyle = "#ddd";
+        ctx.font = "bold 12px Arial";
+        ctx.textAlign = "right";
+        const labelX = no.x - 20;
+        ctx.fillText(nomesEntradas[i], labelX, no.y - 5);
+        
+        // Valor da ativação (se disponível)
+        if (ativacoes) {
+          ctx.fillStyle = "#aaa";
+          ctx.font = "10px Arial";
+          ctx.fillText(ativacao.toFixed(2), labelX, no.y + 15);
+        }
       }
 
       // Desenha nós ocultos
@@ -929,7 +999,7 @@
         const no = nosOculto[h];
         const ativacao = ativacoes ? ativacoes.oculto[h] : 0;
         const cor = ativacoes ? obterCorAtivacao(ativacao) : "#FFC107";
-        const tamanho = ativacoes ? obterTamanhoNo(ativacao) : 7;
+        const tamanho = ativacoes ? obterTamanhoNo(ativacao) : 14;
         
         ctx.fillStyle = cor;
         ctx.beginPath();
@@ -940,14 +1010,32 @@
         ctx.strokeStyle = "#fff";
         ctx.lineWidth = 1;
         ctx.stroke();
+
+        // Label do neurônio oculto
+        ctx.fillStyle = "#ddd";
+        ctx.font = "bold 12px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText(`H${h + 1}`, no.x, no.y - 18);
+        
+        // Valor da ativação (se disponível)
+        if (ativacoes) {
+          ctx.fillStyle = "#aaa";
+          ctx.font = "10px Arial";
+          ctx.fillText(ativacao.toFixed(2), no.x, no.y + 18);
+        }
       }
+
+      // Nomes das saídas
+      const nomesSaidas = [
+        "Movimento"
+      ];
 
       // Desenha nós de saída
       for (let o = 0; o < TAMANHO_SAIDA; o++) {
         const no = nosSaida[o];
         const ativacao = ativacoes ? ativacoes.saida[o] : 0;
         const cor = ativacoes ? obterCorAtivacao(ativacao) : "#03A9F4";
-        const tamanho = ativacoes ? obterTamanhoNo(ativacao) : 7;
+        const tamanho = ativacoes ? obterTamanhoNo(ativacao) : 14;
         
         ctx.fillStyle = cor;
         ctx.beginPath();
@@ -958,14 +1046,37 @@
         ctx.strokeStyle = "#fff";
         ctx.lineWidth = 1;
         ctx.stroke();
+
+        // Label do neurônio de saída
+        ctx.fillStyle = "#ddd";
+        ctx.font = "bold 14px Arial";
+        ctx.textAlign = "left";
+        ctx.fillText(nomesSaidas[o], no.x + 18, no.y - 8);
+        
+        // Valor da ativação e ação
+        if (ativacoes) {
+          ctx.fillStyle = "#aaa";
+          ctx.font = "11px Arial";
+          ctx.fillText(ativacao.toFixed(2), no.x + 18, no.y + 10);
+          
+          // Indicação da ação (sobe/desce)
+          const acao = ativacao < 0 ? "↑ Sobe" : ativacao > 0 ? "↓ Desce" : "—";
+          ctx.fillStyle = ativacao < 0 ? "#4CAF50" : ativacao > 0 ? "#FF9800" : "#888";
+          ctx.font = "bold 12px Arial";
+          ctx.fillText(acao, no.x + 18, no.y + 25);
+        }
       }
 
-      // Legendas
-      ctx.fillStyle = "#eee";
-      ctx.font = "12px Arial";
-      ctx.fillText("Entradas", nosEntrada[0].x - 20, 20);
-      ctx.fillText("Oculta", nosOculto[0].x - 15, 20);
-      ctx.fillText("Saída", nosSaida[0].x - 10, 20);
+      // Títulos das camadas
+      ctx.fillStyle = "#4CAF50";
+      ctx.font = "bold 16px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("Entradas", nosEntrada[0].x, 30);
+      ctx.fillText("Oculta", nosOculto[0].x, 30);
+      ctx.fillText("Saída", nosSaida[0].x, 30);
+      
+      // Resetar alinhamento
+      ctx.textAlign = "left";
     }
 
     /*************************************************
